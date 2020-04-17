@@ -1,10 +1,7 @@
 ---
 # tasks file for roles/workstation
 
-#
 # Additional packages
-#
-
 - name: "Installing additional packages"
   dnf:
     name:
@@ -20,7 +17,16 @@
       - tmux
       - fish
       - util-linux
+      - jetbrains-mono-fonts-all
     state: present
+
+# Cleanup
+- name: Remove unwanted package
+  dnf:
+    name:
+      - open-vm-tools
+      - firewalld
+    state: absent
 
 # Shell
 - name: Update default shell to fish
@@ -220,5 +226,4 @@
       - make
       - yarn
     state: present
-
 
