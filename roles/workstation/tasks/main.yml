@@ -24,7 +24,10 @@
 
 # Shell
 - name: Update default shell to fish
-  command: chsh agravelot -s /usr/bin/fish
+  user:
+    name: docker
+    shell: /usr/bin/fish
+    append: yes
 
 # icc brightness
 
@@ -99,9 +102,7 @@
     name: com.discordapp.Discord
     state: present
 
-
-
-
+# SSH keys
 - name: Create a 2048-bit SSH key for user agravelot in ~agravelot/.ssh/id_rsa
   user:
     name: agravelot
@@ -109,5 +110,53 @@
     ssh_key_bits: 2048
     ssh_key_file: .ssh/id_rsa
 
+
+# Docker
+- name: Cleanup conflicts package with docker
+  dnf:
+    name:
+      - docker
+      - docker-client
+      - docker-client-latest
+      - docker-common
+      - docker-latest
+      - docker-latest-logrotate
+      - docker-logrotate
+      - docker-selinux
+      - docker-engine-selinux
+      - docker-engine
+    state: absent
+
+- name: Add Docker repo
+  get_url:
+      url: https://download.docker.com/linux/fedora/docker-ce.repo
+      dest: /etc/yum.repos.d/docker-ce.repo
+  become: yes
+
+- name: Change docker repository version to 31 unitl 32 released
+  replace:
+    path: /etc/yum.repos.d/docker-ce.repo
+    regexp: '\$releasever'
+    replace: '31'
+
+- name: "Installing docker"
+  dnf:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+
+- name: Make sure docker service is running
+  systemd:
+    state: started
+    name: docker
+    enabled: yes
+
+- name: Add user agravelot to docker group
+  user:
+    name: agravelot
+    groups: docker
+    append: yes
 
 
