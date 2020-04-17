@@ -171,4 +171,54 @@
       - pulseaudio-module-bluetooth-freeworld
     state: present
 
+# Intel undervolt
+- git:
+    repo: 'https://github.com/kitsunyan/intel-undervolt.git'
+    dest: /tmp/intel-undervolt
+
+- name: Enable systemd build
+  command: ./configure --enable-systemd
+  args:
+    chdir: /tmp/intel-undervolt
+
+- name: Build the default target
+  make:
+    chdir: /tmp/intel-undervolt
+
+- name: Run 'install' target as root
+  make:
+    chdir:  /tmp/intel-undervolt
+    target: install
+  become: yes
+
+- name: Make sure intel-undervolt service is running
+  systemd:
+    state: started
+    name: intel-undervolt
+    enabled: yes
+
+# TODO Add config
+
+
+# NodeJS
+- name: Add NodeJS repository
+  dnf:
+    name: https://rpm.nodesource.com/pub_13.x/fc/32/x86_64/nodesource-release-fc32-1.noarch.rpm
+    state: present
+
+- name: Add Docker repo
+  get_url:
+      url: https://dl.yarnpkg.com/rpm/yarn.repo
+      dest: /etc/yum.repos.d/yarn.repo
+  become: yes
+
+- name: Install Node.js and yarn
+  dnf:
+    name:
+      - nodejs
+      - gcc-c++
+      - make
+      - yarn
+    state: present
+
 
