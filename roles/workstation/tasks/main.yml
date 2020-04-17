@@ -159,4 +159,16 @@
     groups: docker
     append: yes
 
+# LDAC / AptX support
+- name: remove previous codecs
+  dnf:
+    name: pulseaudio-module-bluetooth
+    state: absent
+
+- name: Add LDAC/AptX codecs
+  dnf:
+    name:
+      - pulseaudio-module-bluetooth-freeworld
+    state: present
+
 
