@@ -26,6 +26,11 @@
     name:
       - open-vm-tools
       - firewalld
+      - gnome-boxes
+      - virtualbox-guest-additions
+      - libvirt-libs
+      - libvirt
+
     state: absent
 
 # Shell
@@ -226,4 +231,7 @@
       - make
       - yarn
     state: present
+
+# Postgres
+# https://github.com/geerlingguy/ansible-role-postgresql
 
