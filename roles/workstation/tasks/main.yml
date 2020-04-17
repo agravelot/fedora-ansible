@@ -1,0 +1,113 @@
+---
+# tasks file for roles/workstation
+
+#
+# Additional packages
+#
+
+- name: "Installing additional packages"
+  dnf:
+    name:
+      - git
+      - flatpak
+      - gimp
+#      - google-chrome-stable
+      - gnome-terminal-nautilus
+      - gnome-tweak-tool
+      - htop
+      - levien-inconsolata-fonts
+      - ranger
+      - tmux
+      - fish
+      - util-linux
+    state: present
+
+# Shell
+- name: Update default shell to fish
+  command: chsh agravelot -s /usr/bin/fish
+
+# icc brightness
+
+- name: "Installing package for icc-brightness"
+  dnf:
+    name:
+      - lcms2-devel
+      - make
+      - gcc
+    state: present
+
+- git:
+    repo: 'https://github.com/udifuchs/icc-brightness.git'
+    dest: /tmp/icc-brightness
+
+
+- name: Build the default target
+  make:
+    chdir: /tmp/icc-brightness
+
+- name: Run 'install' target as root
+  make:
+    chdir:  /tmp/icc-brightness
+    target: install
+  become: yes
+
+# Install brave
+
+- name: Add Brave repository
+  yum_repository:
+    name: brave
+    description: Brave RPM repository
+    baseurl: https://brave-browser-rpm-release.s3.brave.com/x86_64/
+
+- name: Importing rpm-gpg key from brave
+  rpm_key:
+    state: present
+    key: https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+
+- name: "Installing package for brave"
+  dnf:
+    name:
+      - brave-browser
+    state: present
+
+# Flatpak
+
+# - name: Add the Gnome flatpak remote to the system installation
+#   flatpak_remote:
+#     name: gnome
+#     state: present
+#     flatpakrepo_url: https://sdk.gnome.org/gnome-apps.flatpakrepo
+
+- name: Add the flathub flatpak repository remote to the user installation
+  flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+
+- name: Install spotify from flathub
+  flatpak:
+    name: com.spotify.Client
+    state: present
+
+- name: Install slack from flathub
+  flatpak:
+    name: com.slack.Slack
+    state: present
+
+- name: Install discord from flathub
+  flatpak:
+    name: com.discordapp.Discord
+    state: present
+
+
+
+
+- name: Create a 2048-bit SSH key for user agravelot in ~agravelot/.ssh/id_rsa
+  user:
+    name: agravelot
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: .ssh/id_rsa
+
+
+

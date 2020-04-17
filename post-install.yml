@@ -1,0 +1,11 @@
+---
+- name: Fedora Workstation Post Install
+  hosts: localhost
+  connection: local
+  become: yes
+  remote_user: agravelot
+
+  roles:
+    - common
+    - workstation
+    - tweaks

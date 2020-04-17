@@ -1,0 +1,60 @@
+---
+# tasks file for common
+
+
+#
+# Insntall Ansible required packages
+#
+
+# - name: Insntall required packages by Ansible dnf module 
+#   command: /usr/bin/dnf install -y python3-dnf
+#   args:
+#     warn: no
+
+# Initial system update
+#
+
+- name: Updating system
+  dnf: name='*' state=latest
+
+#
+# http://rpmfusion.org/Configuration
+#
+
+- name: Install the RPM Fusion free repo
+  dnf: 
+    name=https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_distribution_major_version }}.noarch.rpm
+    state=present
+
+- name: Install the RPM Fusion nonfree repo
+  dnf: 
+    name=https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_distribution_major_version }}.noarch.rpm
+    state=present
+  when: add_rpmfusion_nonfree == true
+
+#
+# http://rpmfusion.org/keys
+#
+
+- name: Importing rpm-gpg key from RPM Fusion free repo
+  dnf:
+    name: 'https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-branched.noarch.rpm'
+    state: present
+
+- name: Importing rpm-gpg key from RPM Fusion nonfree repo
+  dnf:
+    name: 'https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-branched.noarch.rpm'
+    state: present
+  when: add_rpmfusion_nonfree == true
+
+#
+# Google Chrome browser
+#
+
+- name: Install Google Chrome repo
+  copy: src=google-chrome.repo dest=/etc/yum.repos.d/ owner=root group=root mode=0644
+
+- name: Importing rpm-gpg key of Google Chrome
+  rpm_key:
+   key=https://dl-ssl.google.com/linux/linux_signing_key.pub
+   state=present
