@@ -42,7 +42,7 @@
 
 # icc brightness
 
-- name: "Installing package for icc-brightness"
+- name: Installing package for icc-brightness
   dnf:
     name:
       - lcms2-devel
@@ -50,7 +50,8 @@
       - gcc
     state: present
 
-- git:
+- name: Pull icc-brightness
+  git:
     repo: 'https://github.com/udifuchs/icc-brightness.git'
     dest: /tmp/icc-brightness
 
@@ -111,6 +112,11 @@
 - name: Install discord from flathub
   flatpak:
     name: com.discordapp.Discord
+    state: present
+
+- name: Install MS Teams from flathub
+  flatpak:
+    name: com.microsoft.Teams
     state: present
 
 # SSH keys
@@ -233,27 +239,80 @@
     state: present
 
 # Postgres
-# https://github.com/geerlingguy/ansible-role-postgresql
 
 - name: install postgres
   dnf:
     name:
       - postgresql-server
       - postgresql-contrib
+      - python3-psycopg2
 
 - name: Init postgres
   command:
     cmd: postgresql-setup --initdb --unit postgresql
     creates: /var/lib/pgsql/data
 
+- name: Grant users agravelot access to databases agravelot from samehost
+  postgresql_pg_hba:
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    contype: host
+    method: md5
+    users: agravelot
+    source: samehost
+    create: true
+
+- name: Cleanup peer logins
+  postgresql_pg_hba:
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    contype: local
+    method: peer
+    users: all
+    state: absent
+
+- name: Cleanup peer logins
+  postgresql_pg_hba:
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    contype: local
+    method: peer
+    users: all
+    databases: replication
+    state: absent
+
+- name: Can login postgres without password (postgres bypass)
+  postgresql_pg_hba:
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    contype: host
+    method: trust
+    users: postgres
+    source: samehost
+    state: present
+
 - name: Make sure postgresql service is running
   systemd:
-    state: started
+    state: restarted
     name: postgresql
     enabled: no
 
+# - name: Connect to agravelot database, create agravelot user, and grant access to database
+#   postgresql_user:
+#     db: agravelot
+#     name: agravelot
+#     password: agravelot
 
-# nVidia
+- name: Remove postgres bypass
+  postgresql_pg_hba:
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    contype: host
+    method: trust
+    users: postgres
+    source: samehost
+    state: absent
+
+- name: Make sure postgresql service is running
+  systemd:
+    state: restarted
+    name: postgresql
+    enabled: no
 
 # Jetbrain toolbox
 
@@ -317,4 +376,23 @@
         state: absent
       changed_when: no
 
+# VS Code
+
+- name: Importing rpm-gpg key from vscode
+  rpm_key:
+    state: present
+    key: https://packages.microsoft.com/keys/microsoft.asc
+
+- name: add vscode repository
+  command:
+    cmd: sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+
+- name: "Installing vscode"
+  dnf:
+    name:
+      - code
+    state: present
+
+
+# nVidia
 
