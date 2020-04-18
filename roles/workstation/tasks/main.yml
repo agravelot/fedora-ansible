@@ -235,6 +235,24 @@
 # Postgres
 # https://github.com/geerlingguy/ansible-role-postgresql
 
+- name: install postgres
+  dnf:
+    name:
+      - postgresql-server
+      - postgresql-contrib
+
+- name: Init postgres
+  command:
+    cmd: postgresql-setup --initdb --unit postgresql
+    creates: /var/lib/pgsql/data
+
+- name: Make sure postgresql service is running
+  systemd:
+    state: started
+    name: postgresql
+    enabled: no
+
+
 # nVidia
 
 # Jetbrain toolbox
