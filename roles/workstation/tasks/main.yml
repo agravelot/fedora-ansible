@@ -383,9 +383,13 @@
     state: present
     key: https://packages.microsoft.com/keys/microsoft.asc
 
-- name: add vscode repository
-  command:
-    cmd: sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+- name: Add Visual Studio Code repository
+  yum_repository:
+    name: Visual Studio Code
+    description: Visual Studio Code
+    baseurl: https://packages.microsoft.com/yumrepos/vscode
+    gpgcheck: yes
+    gpgkey: https://packages.microsoft.com/keys/microsoft.asc
 
 - name: "Installing vscode"
   dnf:
@@ -395,4 +399,17 @@
 
 
 # nVidia
+
+# PHP
+- name: Install php with dependancies
+  dnf:
+    name:
+      - php
+      - composer
+
+- composer:
+    command: require
+    global_command: yes
+    arguments: hirak/prestissimo
+  become_user: agravelot
 
