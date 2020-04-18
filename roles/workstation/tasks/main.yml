@@ -3,6 +3,7 @@
 
 # Additional packages
 - name: "Installing additional packages"
+  become_exe: sudo
   dnf:
     name:
       - git
@@ -30,9 +31,8 @@
       - virtualbox-guest-additions
       - libvirt-libs
       - libvirt
-
     state: absent
-
+  
 # Shell
 - name: Update default shell to fish
   user:
@@ -416,3 +416,63 @@
 # Grub
 - name: Update grub config
   command: grubby --update-kernel=ALL --args "rhgb quiet i915.enable_fbc=1 i915.enable_guc=3 modprobe.blacklist=iTCO_wdt nowatchdog systemd.unified_cgroup_hierarchy=0 mem_sleep_default=deep"
+  
+# GNOME
+
+# needed by dconf module
+- name: install psutil (Fedora)
+  dnf:
+    name: 
+    - python3-psutil
+    - dconf-editor
+
+- name: Switch to Adwaita dark theme
+  command:
+    cmd: gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
+
+# - name: nautilus use list view
+#   command:
+#     cmd: gsettings set org.gnome.nautilus.preferences.default-folder-viewer "'list-view'"
+
+# - name: nautilus use list view
+#   command:
+#     cmd: gsettings set org.gnome.nautilus.list-view.default-visible-columns "['name', 'size', 'date_modified', 'permissions', 'owner', 'group']"
+
+# - name: automatic timezone
+#   dconf:
+#     key: "/org/gnome/desktop/datetime/automatic-timezone"
+#     value: "true"
+
+# - name: file browser shortcut
+#   dconf:
+#     key: "/org/gnome/settings-daemon/plugins/media-keys/home"
+#     value: "'<Super>f'"
+
+# Multimedia codecs 
+# https://docs.fedoraproject.org/en-US/quick-docs/assembly_installing-plugins-for-playing-movies-and-music/
+- name: Install codecs
+  dnf:
+    name:
+      - gstreamer1-plugins-base
+      - gstreamer1-plugins-bad-free
+      - gstreamer1-plugins-bad-freeworld
+      - gstreamer1-plugins-bad-free-extras
+      - gstreamer1-plugins-bad-free-wildmidi
+      - gstreamer1-plugins-bad-free-fluidsynth
+      - gstreamer1-plugins-good
+      - gstreamer1-plugins-good-qt
+      - gstreamer1-plugins-good-gtk
+      - gstreamer1-plugins-good-extras
+      - gstreamer1-plugin-openh264
+      - gstreamer1-libav
+      - lame
+      - libva-intel-hybrid-driver
+      - libva-intel-driver
+      - libva-utils
+
+
+- name: upgrade the 'Multimedia' package group
+  dnf:
+    state: latest
+    name: '@Multimedia'
+    update_only: true

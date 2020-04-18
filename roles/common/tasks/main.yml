@@ -15,7 +15,10 @@
 #
 
 - name: Updating system
-  dnf: name='*' state=latest
+  dnf: 
+    name: '*' 
+    state: latest
+    update_only: true
 
 #
 # http://rpmfusion.org/Configuration
