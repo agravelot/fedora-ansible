@@ -99,25 +99,21 @@
     state: present
     flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
 
-- name: Install spotify from flathub
+- name: Install flatpak packages
   flatpak:
-    name: com.spotify.Client
+    name: "{{ item }}"
     state: present
+  loop:
+     - com.spotify.Client
+     - com.slack.Slack
+     - com.discordapp.Discord
+     - com.axosoft.GitKraken
+     - com.microsoft.Teams
+     - com.leinardi.gst
+     - com.github.calo001.fondo
+     - com.getpostman.Postman
+     - org.gnome.Builder
 
-- name: Install slack from flathub
-  flatpak:
-    name: com.slack.Slack
-    state: present
-
-- name: Install discord from flathub
-  flatpak:
-    name: com.discordapp.Discord
-    state: present
-
-- name: Install MS Teams from flathub
-  flatpak:
-    name: com.microsoft.Teams
-    state: present
 
 # SSH keys
 - name: Create a 2048-bit SSH key for user agravelot in ~agravelot/.ssh/id_rsa
@@ -162,6 +158,7 @@
       - docker-ce
       - docker-ce-cli
       - containerd.io
+      - docker-compose
     state: present
 
 - name: Make sure docker service is running
@@ -240,7 +237,7 @@
 
 # Postgres
 
-- name: install postgres
+- name: Install postgres
   dnf:
     name:
       - postgresql-server
@@ -318,7 +315,7 @@
 
 - name: Check if JetBrains Toolbox is already installed
   stat:
-    path: ~/.local/share/JetBrains/Toolbox
+    path: /home/agravelot/.jetbrain
   register: st_jetbrains_toolbox
 
 - block:
@@ -358,16 +355,22 @@
         jetbrains_toolbox_download_query: "TBA[?version == '{{ jetbrains_toolbox_version }}'].downloads.linux.link"
         jetbrains_toolbox_checksum_link: "TBA[?version == '{{ jetbrains_toolbox_version }}'].downloads.linux.checksumLink"
 
+    - name: Create installation folder
+      file:
+        path: /home/agravelot/.jetbrain
+        state: directory
+
     - name: Unpack install archive
       unarchive:
         src: "{{ jetbrains_toolbox_download_dir.path }}/jetbrains_toolbox.tar.gz"
-        dest: "{{ jetbrains_toolbox_download_dir.path }}"
+        dest: "/home/agravelot/.jetbrain"
         list_files: yes
         remote_src: yes
       register: jetbrains_toolbox_unarchive
 
     - name: Install JetBrains Toolbox
-      command: "{{ jetbrains_toolbox_download_dir.path }}/{{ jetbrains_toolbox_unarchive.files | first }}/jetbrains-toolbox --install"
+      command: "/home/agravelot/.jetbrain/{{ jetbrains_toolbox_unarchive.files | first }}/jetbrains-toolbox --install"
+      become_user: agravelot
   when: st_jetbrains_toolbox.stat.exists == False
   always:
     - name: Delete temporary download directory
@@ -406,6 +409,9 @@
     name:
       - php
       - composer
+      - php-pecl-redis5
+      - php-pecl-imagick
+      - php-pgsql.x86_64
 
 - composer:
     command: require
@@ -416,7 +422,8 @@
 # Grub
 - name: Update grub config
   command: grubby --update-kernel=ALL --args "rhgb quiet i915.enable_fbc=1 i915.enable_guc=3 modprobe.blacklist=iTCO_wdt nowatchdog systemd.unified_cgroup_hierarchy=0 mem_sleep_default=deep"
-  
+  become: true
+
 # GNOME
 
 # needed by dconf module
@@ -447,6 +454,16 @@
 #   dconf:
 #     key: "/org/gnome/settings-daemon/plugins/media-keys/home"
 #     value: "'<Super>f'"
+
+# - name: Enable nigth mode
+#   command:
+#     cmd: dconf write /org/gnome/settings-daemon/plugins/color/night-light-enabled true
+#   become_user: agravelot
+
+# - name: Enable nigth mode
+#   dconf:
+#     key: /org/gnome/settings-daemon/plugins/color/night-light-enabled
+#     value: 'true'
 
 # Multimedia codecs 
 # https://docs.fedoraproject.org/en-US/quick-docs/assembly_installing-plugins-for-playing-movies-and-music/
@@ -485,3 +502,19 @@
       - libva-intel-hybrid-driver
       - libva-intel-driver
       - libva-utils
+
+# NVIDIA PRIME Support
+- name: Enalble nvidia PRIME support
+  copy:
+    dest: /etc/modprobe.d/nvidia.conf
+    content: options nvidia NVreg_DynamicPowerManagement=0x02
+
+
+# Increase IO Notify limit
+
+- name: set max_user_watches
+  become: yes
+  sysctl:
+    name: fs.inotify.max_user_watches
+    value: "524288"
+    state: present
