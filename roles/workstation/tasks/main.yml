@@ -19,6 +19,7 @@
       - fish
       - util-linux
       - jetbrains-mono-fonts-all
+      - lm_sensors
     state: present
 
 # Cleanup
@@ -490,18 +491,36 @@
     name: '@Multimedia'
     update_only: true
 
+
+# https://negativo17.org/repos/fedora-nvidia.repo
+# [fedora-nvidia]
+# name=negativo17 - Nvidia
+# baseurl=https://negativo17.org/repos/nvidia/fedora-$releasever/$basearch/
+# enabled=1
+# skip_if_unavailable=1
+# gpgcheck=1
+# gpgkey=https://negativo17.org/repos/RPM-GPG-KEY-slaanesh
+# enabled_metadata=1
+# metadata_expire=6h
+# type=rpm-md
+# repo_gpgcheck=0
+
+- name: Add negativo17 - Nvidia repository
+  command:
+    cmd: dnf config-manager --add-repo=https://negativo17.org/repos/fedora-nvidia.repo
+
 - name: Install nvidia graphics driver
   dnf:
     name:
       - vulkan
-      - xorg-x11-drv-nvidia
-      - xorg-x11-drv-nvidia-cuda
-      - xorg-x11-drv-nvidia-cuda-libs
-      - akmod-nvidia
-      - xorg-x11-drv-nvidia
-      - libva-intel-hybrid-driver
-      - libva-intel-driver
-      - libva-utils
+      - nvidia-driver
+      - nvidia-driver-libs.i686
+      - nvidia-settings
+      - cuda
+      - nvidia-driver-cuda
+      #- libva-intel-hybrid-driver
+      #- libva-intel-driver
+      #- libva-utils
 
 # NVIDIA PRIME Support
 - name: Enalble nvidia PRIME support
