@@ -491,20 +491,6 @@
     name: '@Multimedia'
     update_only: true
 
-
-# https://negativo17.org/repos/fedora-nvidia.repo
-# [fedora-nvidia]
-# name=negativo17 - Nvidia
-# baseurl=https://negativo17.org/repos/nvidia/fedora-$releasever/$basearch/
-# enabled=1
-# skip_if_unavailable=1
-# gpgcheck=1
-# gpgkey=https://negativo17.org/repos/RPM-GPG-KEY-slaanesh
-# enabled_metadata=1
-# metadata_expire=6h
-# type=rpm-md
-# repo_gpgcheck=0
-
 - name: Add negativo17 - Nvidia repository
   command:
     cmd: dnf config-manager --add-repo=https://negativo17.org/repos/fedora-nvidia.repo
@@ -518,16 +504,9 @@
       - nvidia-settings
       - cuda
       - nvidia-driver-cuda
-      #- libva-intel-hybrid-driver
-      #- libva-intel-driver
-      #- libva-utils
-
-# NVIDIA PRIME Support
-- name: Enalble nvidia PRIME support
-  copy:
-    dest: /etc/modprobe.d/nvidia.conf
-    content: options nvidia NVreg_DynamicPowerManagement=0x02
-
+      - libva-intel-hybrid-driver
+      - libva-intel-driver
+      - libva-utils
 
 # Increase IO Notify limit
 
