@@ -20,6 +20,8 @@
       - util-linux
       - jetbrains-mono-fonts-all
       - lm_sensors
+      - exfat-utils
+      - fuse-exfat
     state: present
 
 # Cleanup
