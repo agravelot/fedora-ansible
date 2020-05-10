@@ -116,6 +116,7 @@
      - com.github.calo001.fondo
      - com.getpostman.Postman
      - org.gnome.Builder
+     - com.github.marktext.marktext
 
 
 # SSH keys
