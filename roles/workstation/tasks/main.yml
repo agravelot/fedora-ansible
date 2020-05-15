@@ -157,6 +157,7 @@
     regexp: '\$releasever'
     replace: '31'
 
+# https://github.com/docker/for-linux/issues/955
 - name: "Installing docker"
   dnf:
     name:
