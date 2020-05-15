@@ -39,7 +39,7 @@
 # Shell
 - name: Update default shell to fish
   user:
-    name: docker
+    name: agravelot
     shell: /usr/bin/fish
     append: yes
 
@@ -117,6 +117,7 @@
      - com.getpostman.Postman
      - org.gnome.Builder
      - com.github.marktext.marktext
+     - org.gabmus.hydrapaper
 
 
 # SSH keys
@@ -159,9 +160,9 @@
 - name: "Installing docker"
   dnf:
     name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
+      - moby-engine
+      - moby-engine-fish-completion
+      - moby-engine-nano
       - docker-compose
     state: present
 
@@ -225,7 +226,7 @@
     name: https://rpm.nodesource.com/pub_13.x/fc/32/x86_64/nodesource-release-fc32-1.noarch.rpm
     state: present
 
-- name: Add Docker repo
+- name: Add Yarn repo
   get_url:
       url: https://dl.yarnpkg.com/rpm/yarn.repo
       dest: /etc/yum.repos.d/yarn.repo
@@ -522,3 +523,7 @@
     name: fs.inotify.max_user_watches
     value: "524288"
     state: present
+
+
+# Enable brave/chromium hardware acceleration ?
+# https://wiki.archlinux.org/index.php/Chromium#Force_GPU_acceleration
