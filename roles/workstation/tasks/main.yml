@@ -161,9 +161,8 @@
 - name: "Installing docker"
   dnf:
     name:
-      - moby-engine
-      - moby-engine-fish-completion
-      - moby-engine-nano
+      - docker-ce
+      - docker-ce-cli
       - docker-compose
     state: present
 
