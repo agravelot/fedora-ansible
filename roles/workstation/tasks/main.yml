@@ -9,7 +9,6 @@
       - git
       - flatpak
       - gimp
-#      - google-chrome-stable
       - gnome-terminal-nautilus
       - gnome-tweak-tool
       - htop
@@ -22,6 +21,7 @@
       - lm_sensors
       - exfat-utils
       - fuse-exfat
+#      - google-chrome-stable
     state: present
 
 # Cleanup
@@ -85,7 +85,7 @@
 - name: "Installing package for brave"
   dnf:
     name:
-      - brave-browser
+      brave-browser
     state: present
 
 # Flatpak
@@ -110,7 +110,6 @@
      - com.spotify.Client
      - com.slack.Slack
      - com.discordapp.Discord
-     - com.axosoft.GitKraken
      - com.microsoft.Teams
      - com.leinardi.gst
      - com.github.calo001.fondo
@@ -151,7 +150,7 @@
       dest: /etc/yum.repos.d/docker-ce.repo
   become: yes
 
-- name: Change docker repository version to 31 unitl 32 released
+- name: Change docker repository version to 31 unitl 33 released
   replace:
     path: /etc/yum.repos.d/docker-ce.repo
     regexp: '\$releasever'
@@ -191,24 +190,11 @@
     state: present
 
 # Intel undervolt
-- git:
-    repo: 'https://github.com/kitsunyan/intel-undervolt.git'
-    dest: /tmp/intel-undervolt
-
-- name: Enable systemd build
-  command: ./configure --enable-systemd
-  args:
-    chdir: /tmp/intel-undervolt
-
-- name: Build the default target
-  make:
-    chdir: /tmp/intel-undervolt
-
-- name: Run 'install' target as root
-  make:
-    chdir:  /tmp/intel-undervolt
-    target: install
-  become: yes
+- name: Add LDAC/AptX codecs
+  dnf:
+    name:
+      intel-undervolt
+    state: present
 
 - name: Make sure intel-undervolt service is running
   systemd:
@@ -223,7 +209,7 @@
 # NodeJS
 - name: Add NodeJS repository
   dnf:
-    name: https://rpm.nodesource.com/pub_13.x/fc/32/x86_64/nodesource-release-fc32-1.noarch.rpm
+    name: https://rpm.nodesource.com/pub_14.x/fc/32/x86_64/nodesource-release-fc32-1.noarch.rpm
     state: present
 
 - name: Add Yarn repo
@@ -232,91 +218,91 @@
       dest: /etc/yum.repos.d/yarn.repo
   become: yes
 
-- name: Install Node.js and yarn
-  dnf:
-    name:
-      - nodejs
-      - gcc-c++
-      - make
-      - yarn
-    state: present
+# - name: Install Node.js and yarn
+#   dnf:
+#     name:
+#       - nodejs
+#       - gcc-c++
+#       - make
+#       - yarn
+#     state: present
 
 # Postgres
 
-- name: Install postgres
-  dnf:
-    name:
-      - postgresql-server
-      - postgresql-contrib
-      - python3-psycopg2
+# - name: Install postgres
+#   dnf:
+#     name:
+#       - postgresql-server
+#       - postgresql-contrib
+#       - python3-psycopg2
 
-- name: Init postgres
-  command:
-    cmd: postgresql-setup --initdb --unit postgresql
-    creates: /var/lib/pgsql/data
+# - name: Init postgres
+#   command:
+#     cmd: postgresql-setup --initdb --unit postgresql
+#     creates: /var/lib/pgsql/data
 
-- name: Grant users agravelot access to databases agravelot from samehost
-  postgresql_pg_hba:
-    dest: /var/lib/pgsql/data/pg_hba.conf
-    contype: host
-    method: md5
-    users: agravelot
-    source: samehost
-    create: true
+# - name: Grant users agravelot access to databases agravelot from samehost
+#   postgresql_pg_hba:
+#     dest: /var/lib/pgsql/data/pg_hba.conf
+#     contype: host
+#     method: md5
+#     users: agravelot
+#     source: samehost
+#     create: true
 
-- name: Cleanup peer logins
-  postgresql_pg_hba:
-    dest: /var/lib/pgsql/data/pg_hba.conf
-    contype: local
-    method: peer
-    users: all
-    state: absent
+# - name: Cleanup peer logins
+#   postgresql_pg_hba:
+#     dest: /var/lib/pgsql/data/pg_hba.conf
+#     contype: local
+#     method: peer
+#     users: all
+#     state: absent
 
-- name: Cleanup peer logins
-  postgresql_pg_hba:
-    dest: /var/lib/pgsql/data/pg_hba.conf
-    contype: local
-    method: peer
-    users: all
-    databases: replication
-    state: absent
+# - name: Cleanup peer logins
+#   postgresql_pg_hba:
+#     dest: /var/lib/pgsql/data/pg_hba.conf
+#     contype: local
+#     method: peer
+#     users: all
+#     databases: replication
+#     state: absent
 
-- name: Can login postgres without password (postgres bypass)
-  postgresql_pg_hba:
-    dest: /var/lib/pgsql/data/pg_hba.conf
-    contype: host
-    method: trust
-    users: postgres
-    source: samehost
-    state: present
+# - name: Can login postgres without password (postgres bypass)
+#   postgresql_pg_hba:
+#     dest: /var/lib/pgsql/data/pg_hba.conf
+#     contype: host
+#     method: trust
+#     users: postgres
+#     source: samehost
+#     state: present
 
-- name: Make sure postgresql service is running
-  systemd:
-    state: restarted
-    name: postgresql
-    enabled: no
-    daemon_reload: true
+# - name: Make sure postgresql service is running
+#   systemd:
+#     state: restarted
+#     name: postgresql
+#     enabled: no
+#     daemon_reload: true
 
-# - name: Connect to agravelot database, create agravelot user, and grant access to database
-#   postgresql_user:
-#     db: agravelot
-#     name: agravelot
-#     password: agravelot
+# # - name: Connect to agravelot database, create agravelot user, and grant access to database
+# #   postgresql_user:
+# #     db: agravelot
+# #     name: agravelot
+# #     password: agravelot
 
-- name: Remove postgres bypass
-  postgresql_pg_hba:
-    dest: /var/lib/pgsql/data/pg_hba.conf
-    contype: host
-    method: trust
-    users: postgres
-    source: samehost
-    state: absent
+# - name: Remove postgres bypass
+#   postgresql_pg_hba:
+#     dest: /var/lib/pgsql/data/pg_hba.conf
+#     contype: host
+#     method: trust
+#     users: postgres
+#     source: samehost
+#     state: absent
 
-- name: Make sure postgresql service is running
-  systemd:
-    state: restarted
-    name: postgresql
-    enabled: no
+# - name: Make sure postgresql service is running
+#   systemd:
+#     state: restarted
+#     name: postgresql
+#     enabled: no
 
 # Jetbrain toolbox
 
@@ -405,7 +391,7 @@
 - name: "Installing vscode"
   dnf:
     name:
-      - code
+      code
     state: present
     update_cache: yes
 
@@ -421,11 +407,11 @@
       - php-pecl-imagick
       - php-pgsql.x86_64
 
-- composer:
-    command: require
-    global_command: yes
-    arguments: hirak/prestissimo
-  become_user: agravelot
+# - composer:
+#     command: require
+#     global_command: yes
+#     arguments: hirak/prestissimo
+#   become_user: agravelot
 
 # Grub
 - name: Update grub config
@@ -438,8 +424,8 @@
 - name: install psutil (Fedora)
   dnf:
     name: 
-    - python3-psutil
-    - dconf-editor
+      - python3-psutil
+      - dconf-editor
 
 - name: Switch to Adwaita dark theme
   command:
@@ -498,19 +484,19 @@
     name: '@Multimedia'
     update_only: true
 
-- name: Add negativo17 - Nvidia repository
-  command:
-    cmd: dnf config-manager --add-repo=https://negativo17.org/repos/fedora-nvidia.repo
+# - name: Add negativo17 - Nvidia repository
+#   command:
+#     cmd: dnf config-manager --add-repo=https://negativo17.org/repos/fedora-nvidia.repo
 
 - name: Install nvidia graphics driver
   dnf:
     name:
-      - vulkan
-      - nvidia-driver
-      - nvidia-driver-libs.i686
-      - nvidia-settings
-      - cuda
-      - nvidia-driver-cuda
+      # - vulkan
+      # - nvidia-driver
+      # - nvidia-driver-libs.i686
+      # - nvidia-settings
+      # - cuda
+      # - nvidia-driver-cuda
       - libva-intel-hybrid-driver
       - libva-intel-driver
       - libva-utils
@@ -525,5 +511,5 @@
     state: present
 
 
-# Enable brave/chromium hardware acceleration ?
-# https://wiki.archlinux.org/index.php/Chromium#Force_GPU_acceleration
+# Kubectl
+

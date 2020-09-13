@@ -1,0 +1,3 @@
+---
+# vars file for roles/workstation
+jetbrains_toolbox_version: latest
