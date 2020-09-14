@@ -415,7 +415,7 @@
 
 # Grub
 - name: Update grub config
-  command: grubby --update-kernel=ALL --args "rhgb quiet i915.enable_fbc=1 i915.enable_guc=3 modprobe.blacklist=iTCO_wdt nowatchdog systemd.unified_cgroup_hierarchy=0 mem_sleep_default=deep i915.enable_dpcd_backlight=1"
+  command: grubby --update-kernel=ALL --args "rhgb quiet i915.enable_fbc=1 i915.enable_guc=3 modprobe.blacklist=iTCO_wdt nowatchdog systemd.unified_cgroup_hierarchy=0 mem_sleep_default=deep i915.enable_dpcd_backlight=1 mitigations=off"
   become: true
 
 # GNOME
