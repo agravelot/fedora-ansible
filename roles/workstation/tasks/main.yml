@@ -526,3 +526,65 @@
   dnf:
     name:
       - kubectl
+
+# Custom kustomize with sops
+
+- name: "Installing required packages"
+  become_exe: sudo
+  dnf:
+    name:
+      - go
+    state: present
+
+- name: install sops
+  dnf:
+    name: 'https://github.com/mozilla/sops/releases/download/v3.6.1/sops-3.6.1-1.x86_64.rpm'
+    state: present
+    disable_gpg_check: yes
+
+- name: Pull kustomize-sops
+  git:
+    repo: 'https://github.com/viaduct-ai/kustomize-sops.git'
+    dest: /tmp/kustomize-sops
+    force: yes
+  become: yes
+  become_user: agravelot
+
+- name: Remove kustomize version call in build script
+  replace:
+    path: /tmp/kustomize-sops/scripts/install-kustomize.sh
+    regexp: 'kustomize version'
+    replace: ''
+  become: yes
+  become_user: agravelot
+
+- name: Execute the command in remote shell; stdout goes to the specified file on the remote.
+  shell: export XDG_CONFIG_HOME=/home/agravelot/.config
+  become: yes
+  become_user: agravelot
+
+- name: Patch go.mod to avoid domain name nout found
+  shell: echo 'replace vbom.ml/util => github.com/fvbommel/sortorder v1.0.1' >> /tmp/kustomize-sops/go.mod
+  become: yes
+  become_user: agravelot
+
+- name: Build the default target
+  shell:
+    cmd: XDG_CONFIG_HOME=/home/agravelot/.config GOPATH=/home/agravelot/.go make
+    chdir: /tmp/kustomize-sops
+  become: yes
+  become_user: agravelot
+
+- name: Install Kustomize
+  shell:
+    chdir: /tmp/kustomize-sops
+    cmd: XDG_CONFIG_HOME=/home/agravelot/.config make kustomize
+  become: yes
+  become_user: agravelot
+
+- name: Install KSOPS plugin
+  shell:
+    chdir: /tmp/kustomize-sops
+    cmd: XDG_CONFIG_HOME=/home/agravelot/.config make install
+  become: yes
+  become_user: agravelot
