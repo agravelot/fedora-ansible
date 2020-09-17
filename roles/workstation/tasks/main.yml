@@ -542,6 +542,14 @@
     state: present
     disable_gpg_check: yes
 
+- name: Register kustomize installation status
+  command: which kustomize
+  changed_when: false
+  failed_when: kustomize_installed.rc not in [0,1]
+  register: kustomize_installed
+  become: yes
+  become_user: agravelot
+
 - name: Pull kustomize-sops
   git:
     repo: 'https://github.com/viaduct-ai/kustomize-sops.git'
@@ -549,6 +557,7 @@
     force: yes
   become: yes
   become_user: agravelot
+  when: kustomize_installed.rc not in [ 0 ]
 
 - name: Remove kustomize version call in build script
   replace:
@@ -557,16 +566,19 @@
     replace: ''
   become: yes
   become_user: agravelot
+  when: kustomize_installed.rc not in [ 0 ]
 
 - name: Execute the command in remote shell; stdout goes to the specified file on the remote.
   shell: export XDG_CONFIG_HOME=/home/agravelot/.config
   become: yes
   become_user: agravelot
+  when: kustomize_installed.rc not in [ 0 ]
 
 - name: Patch go.mod to avoid domain name nout found
   shell: echo 'replace vbom.ml/util => github.com/fvbommel/sortorder v1.0.1' >> /tmp/kustomize-sops/go.mod
   become: yes
   become_user: agravelot
+  when: kustomize_installed.rc not in [ 0 ]
 
 - name: Build the default target
   shell:
@@ -574,6 +586,7 @@
     chdir: /tmp/kustomize-sops
   become: yes
   become_user: agravelot
+  when: kustomize_installed.rc not in [ 0 ]
 
 - name: Install Kustomize
   shell:
@@ -581,6 +594,7 @@
     cmd: XDG_CONFIG_HOME=/home/agravelot/.config make kustomize
   become: yes
   become_user: agravelot
+  when: kustomize_installed.rc not in [ 0 ]
 
 - name: Install KSOPS plugin
   shell:
@@ -588,3 +602,4 @@
     cmd: XDG_CONFIG_HOME=/home/agravelot/.config make install
   become: yes
   become_user: agravelot
+  when: kustomize_installed.rc not in [ 0 ]

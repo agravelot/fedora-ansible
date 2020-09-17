@@ -1,0 +1,49 @@
+---
+- name: Upgrade resample method
+  replace:
+    path: /etc/pulse/daemon.conf
+    regexp: '.*resample-method.*'
+    replace: 'resample-method = speex-float-10'
+
+- name: Upgrade default-sample-format
+  replace:
+    path: /etc/pulse/daemon.conf
+    regexp: '.*default-sample-format.*'
+    replace: 'default-sample-format = float32le'
+
+
+- name: Upgrade default-sample-rate
+  replace:
+    path: /etc/pulse/daemon.conf
+    regexp: '.*default-sample-rate.*'
+    replace: 'default-sample-rate = 96000'
+
+- name: Upgrade alternate-sample-rate
+  replace:
+    path: /etc/pulse/daemon.conf
+    regexp: '.*alternate-sample-rate.*'
+    replace: 'alternate-sample-rate = 44100'
+
+- name: Upgrade avoid-resampling
+  replace:
+    path: /etc/pulse/daemon.conf
+    regexp: '.*avoid-resampling.*'
+    replace: 'avoid-resampling = yes'
+
+# Template
+# - name: Upgrade ___
+#   replace:
+#     path: /etc/pulse/daemon.conf
+#     regexp: '.*___.*'
+#     replace: '___ = ___'
+
+# TODO Only if config changed
+- name: Stop pulseaudio
+  shell: pulseaudio --check && pulseaudio -k
+  become: yes
+  become_user: agravelot
+
+- name: Start pulseaudio
+  shell: pulseaudio -D
+  become: yes
+  become_user: agravelot
