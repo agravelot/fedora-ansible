@@ -3,7 +3,7 @@
   replace:
     path: /etc/pulse/daemon.conf
     regexp: '.*resample-method.*'
-    replace: 'resample-method = speex-float-10'
+    replace: 'resample-method = soxr-vhq'
 
 - name: Upgrade default-sample-format
   replace:
@@ -16,19 +16,49 @@
   replace:
     path: /etc/pulse/daemon.conf
     regexp: '.*default-sample-rate.*'
-    replace: 'default-sample-rate = 96000'
+    replace: 'default-sample-rate = 44100'
 
 - name: Upgrade alternate-sample-rate
   replace:
     path: /etc/pulse/daemon.conf
     regexp: '.*alternate-sample-rate.*'
-    replace: 'alternate-sample-rate = 44100'
+    replace: 'alternate-sample-rate = 96000'
 
 - name: Upgrade avoid-resampling
   replace:
     path: /etc/pulse/daemon.conf
     regexp: '.*avoid-resampling.*'
     replace: 'avoid-resampling = yes'
+
+- name: Upgrade enable-lfe-remixing
+  replace:
+    path: /etc/pulse/daemon.conf
+    regexp: '.*_enable-lfe-remixing__.*'
+    replace: 'enable-lfe-remixing = no'
+
+- name: Upgrade default-sample-channels
+  replace:
+    path: /etc/pulse/daemon.conf
+    regexp: '.*default-sample-channels.*'
+    replace: 'default-sample-channels = 2'
+
+- name: Upgrade default-channel-map
+  replace:
+    path: /etc/pulse/daemon.conf
+    regexp: '.*default-channel-map.*'
+    replace: 'default-channel-map =  front-left,front-right'
+
+- name: Upgrade default-fragments
+  replace:
+    path: /etc/pulse/daemon.conf
+    regexp: '.*default-fragments.*'
+    replace: 'default-fragments = 2'
+
+- name: Upgrade default-fragment-size-msec
+  replace:
+    path: /etc/pulse/daemon.conf
+    regexp: '.*default-fragment-size-msec.*'
+    replace: 'default-fragment-size-msec = 125'
 
 # Template
 # - name: Upgrade ___
@@ -37,13 +67,14 @@
 #     regexp: '.*___.*'
 #     replace: '___ = ___'
 
-# TODO Only if config changed
-- name: Stop pulseaudio
-  shell: pulseaudio --check && pulseaudio -k
-  become: yes
-  become_user: agravelot
 
-- name: Start pulseaudio
-  shell: pulseaudio -D
-  become: yes
-  become_user: agravelot
+# TODO Only if config changed
+# - name: Stop pulseaudio
+#   shell: pulseaudio -k
+#   become: yes
+#   become_user: agravelot
+
+# - name: Start pulseaudio
+#   shell: pulseaudio -D
+#   become: yes
+#   become_user: agravelot

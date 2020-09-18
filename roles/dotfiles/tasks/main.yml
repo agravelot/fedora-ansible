@@ -2,16 +2,10 @@
 
 - name: Copy fish dotfiles
   copy:
-    src: files/config/fish
-    dest: /home/agravelot/.config/
+    src: files/
+    dest: ~/
     backup: true
     owner: agravelot
     group: agravelot
-
-- name: Copy tempaltes dotfiles
-  copy:
-    src: files/config/Templates
-    dest: /home/agravelot/.config/
-    backup: true
-    owner: agravelot
-    group: agravelot
+  become: yes
+  become_user: agravelot
