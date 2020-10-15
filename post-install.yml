@@ -6,7 +6,7 @@
   remote_user: agravelot
 
   roles:
-    - pulseaudio
+    # - pulseaudio
     - common
     - workstation
     - tweaks
