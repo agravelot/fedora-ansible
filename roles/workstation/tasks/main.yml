@@ -45,29 +45,29 @@
 
 # icc brightness
 
-- name: Installing package for icc-brightness
-  dnf:
-    name:
-      - lcms2-devel
-      - make
-      - gcc
-    state: present
+# - name: Installing package for icc-brightness
+#   dnf:
+#     name:
+#       - lcms2-devel
+#       - make
+#       - gcc
+#     state: present
 
-- name: Pull icc-brightness
-  git:
-    repo: 'https://github.com/udifuchs/icc-brightness.git'
-    dest: /tmp/icc-brightness
+# - name: Pull icc-brightness
+#   git:
+#     repo: 'https://github.com/udifuchs/icc-brightness.git'
+#     dest: /tmp/icc-brightness
 
 
-- name: Build the default target
-  make:
-    chdir: /tmp/icc-brightness
+# - name: Build the default target
+#   make:
+#     chdir: /tmp/icc-brightness
 
-- name: Run 'install' target as root
-  make:
-    chdir:  /tmp/icc-brightness
-    target: install
-  become: yes
+# - name: Run 'install' target as root
+#   make:
+#     chdir:  /tmp/icc-brightness
+#     target: install
+#   become: yes
 
 # Install brave
 
@@ -603,3 +603,43 @@
   become: yes
   become_user: agravelot
   when: kustomize_installed.rc not in [ 0 ]
+
+# Theme bigsur
+
+- name: Install GTK2 engines requirements
+  dnf:
+    name:
+      - gtk-murrine-engine 
+      - gtk2-engines
+
+- name: Installation Depends requirement
+  dnf:
+    name:
+      - sassc
+      - optipng
+      - inkscape
+      - glib2-devel
+
+- name: Pull WhiteSur-gtk-theme
+  git:
+    repo: 'https://github.com/vinceliuice/WhiteSur-gtk-theme.git'
+    dest: /tmp/WhiteSur-gtk-theme
+
+- name: Install WhiteSur-gtk-theme
+  shell:
+    chdir: /tmp/WhiteSur-gtk-theme
+    cmd: ./install.sh -g
+  become: yes
+  become_user: agravelot
+
+- name: Pull WhiteSur-icon-theme
+  git:
+    repo: 'https://github.com/vinceliuice/WhiteSur-icon-theme.git'
+    dest: /tmp/WhiteSur-icon-theme
+
+- name: Install WhiteSur-icon-theme
+  shell:
+    chdir: /tmp/WhiteSur-icon-theme
+    cmd: ./install.sh
+  become: yes
+  become_user: agravelot
