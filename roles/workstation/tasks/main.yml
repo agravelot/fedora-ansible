@@ -45,29 +45,29 @@
 
 # icc brightness
 
-# - name: Installing package for icc-brightness
-#   dnf:
-#     name:
-#       - lcms2-devel
-#       - make
-#       - gcc
-#     state: present
+- name: Installing package for icc-brightness
+  dnf:
+    name:
+      - lcms2-devel
+      - make
+      - gcc
+    state: present
 
-# - name: Pull icc-brightness
-#   git:
-#     repo: 'https://github.com/udifuchs/icc-brightness.git'
-#     dest: /tmp/icc-brightness
+- name: Pull icc-brightness
+  git:
+    repo: 'https://github.com/udifuchs/icc-brightness.git'
+    dest: /tmp/icc-brightness
 
 
-# - name: Build the default target
-#   make:
-#     chdir: /tmp/icc-brightness
+- name: Build the default target
+  make:
+    chdir: /tmp/icc-brightness
 
-# - name: Run 'install' target as root
-#   make:
-#     chdir:  /tmp/icc-brightness
-#     target: install
-#   become: yes
+- name: Run 'install' target as root
+  make:
+    chdir:  /tmp/icc-brightness
+    target: install
+  become: yes
 
 # Install brave
 
@@ -534,6 +534,7 @@
   dnf:
     name:
       - go
+      - make
     state: present
 
 - name: install sops
